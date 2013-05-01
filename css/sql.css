@@ -1,0 +1,157 @@
+* {     
+    margin: 0; 
+} 
+html, body{     
+    height: 100%; 
+	overflow: hidden;
+	font-family: verdana;
+font-size: 12px;
+} 	
+#result{			
+	margin-left:20px;			
+}
+.border{
+	border: 1px solid;
+}
+.selected{
+	background-color: #F3D70C !important ;
+}
+.green{
+	color: green !important;
+}
+.red{
+	color: red !important;
+}
+.blue{
+	color:blue !important;
+}
+.pointer{
+	cursor:pointer;
+}
+a:link {text-decoration: none;}
+a:visited {text-decoration: none;}
+a:active {text-decoration: none;}
+.inline{
+	display:inline;
+}
+#statusBar{
+	margin-top: 40px;
+	margin-bottom: 10px;
+}
+#console{
+	border: 1px solid;			
+	height: 140px;
+	overflow: auto;
+}
+#databaseTree{
+	border:1px solid;
+	width:250px;
+	height:152px;
+	float: left;
+	overflow: auto;
+}
+#columns
+{
+	border:1px solid;
+	margin-left: 10px;
+	float:left;
+	width:70%;
+	height:152px;
+	max-height:152px;
+	overflow: auto;
+}
+#middle{
+	min-height:152px;
+}
+.digger{
+	background: url('../images/digger.png') no-repeat;
+	height: 16px;
+	width: 17px;
+}
+.digger.table{
+	background-position: -16px 0px !important;
+	width:18px;
+}
+.digger.column{
+	background-position: -33px 0px !important;
+	width:18px;
+}
+.digger.data{
+	background-position: -50px 0px !important;
+	width:18px;
+}
+.digger.save{
+	background-position: -67px 0px !important;
+	width:18px;
+}
+.digger.info{
+	background-position: -84px 0px !important;
+	width:18px;
+}
+.digger.tableTab{
+	background-position: -101px 0px !important;
+	width:18px;
+}
+.digger.info{
+	background-position: -84px 0px !important;
+	width:18px;
+}
+.digger.info{
+	background-position: -84px 0px !important;
+	width:18px;
+}
+.digger.file{
+	background-position: -117px 0px !important;
+	width:17px;
+}
+.digger.cmd{
+	background-position: -133px 0px !important;
+	width:18px;
+}
+.digger.query{
+	background-position: -150px 0px !important;
+	width:18px;
+}
+.digger.admin{
+	background-position: -167px 0px !important;
+	width:18px;
+}
+.digger.md5{
+	background-position: -184px 0px !important;
+	width:17px;
+}
+.digger.dbs{
+	background-position: 0px 0px !important;
+	width: 17px;
+}
+.digger.settings{
+	background-position: -200px 0px !important;
+	width:18px;
+}
+#middleOptions,#tabOptions{
+	margin-left:340px;
+}
+#middleOptions button div{
+	margin-left:40%;
+}
+#loadingIcon{
+	width:15px;
+}
+.tab{
+	margin:5px;
+	padding:15px;
+	border:1px solid;
+}
+.oculto{
+	display:none;
+}
+#adminTab label{
+	display:block;
+}
+#fileResult{
+	width:700px;
+	height:400px;
+}
+#tabOptions span{
+	display: inline-block;
+}
